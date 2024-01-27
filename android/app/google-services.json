@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "942114489129",
+    "project_id": "roadcare-d0d2f",
+    "storage_bucket": "roadcare-d0d2f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942114489129:android:465fc328c64ff5bef82d38",
+        "android_client_info": {
+          "package_name": "com.example.roadcare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJeF2K0K2xwq9gN1WrrM_wA8OSj43WZAE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
