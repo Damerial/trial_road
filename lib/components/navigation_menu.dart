@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:roadcare/pages/create_report.dart';
-import 'package:roadcare/pages/home_page.dart';
-import 'package:roadcare/pages/view_status_report.dart';
+import 'package:roadcare/pages//user/create_report.dart';
+import 'package:roadcare/pages/user/home_page.dart';
+import 'package:roadcare/pages/user/view_status_report.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({Key? key}) : super(key: key);

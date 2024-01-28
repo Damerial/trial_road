@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:roadcare/pages/view_status_report.dart';
+import 'package:roadcare/pages/user/view_status_report.dart';
 
 class DeleteReportPage extends StatefulWidget {
   final DocumentSnapshot report;

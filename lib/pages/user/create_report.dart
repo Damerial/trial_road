@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
 import 'package:roadcare/components/navigation_menu.dart';
-import 'package:roadcare/pages/set_location.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:roadcare/pages/user/set_location.dart';
 
 class CreateReport extends StatefulWidget {
   @override
