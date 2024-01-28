@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:roadcare/components/my_button.dart';
 import 'package:roadcare/components/my_textfield.dart';
 import 'package:roadcare/components/square_tile.dart';
@@ -30,10 +31,19 @@ class _registerPageState extends State<registerPage> {
 
     try {
       if (passwordController.text == confirmPasswordController.text) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailController.text,
           password: passwordController.text,
         );
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+          'email': emailController.text,
+          'role': 'user'
+        });
         // Dismiss the "Signing Up..." snackbar
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         // You might want to navigate to a different page or show a success message here

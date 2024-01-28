@@ -64,7 +64,7 @@ class _loginPageState extends State<loginPage> {
     });
 
     try {
-      await AuthService().signInWithGoogle();
+      await AuthService().googleSignIn();
       // Navigate to the next page or perform some action upon successful sign-in
       setState(() {
         isGoogleSignInLoading = false; // Stop loading on success
