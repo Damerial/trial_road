@@ -14,48 +14,91 @@ class loginPage extends StatefulWidget {
 }
 
 class _loginPageState extends State<loginPage> {
-  //text editing controller
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  bool isGoogleSignInLoading = false; // Add a loading state for Google sign-in
+  bool isGoogleSignInLoading = false;
 
-  // Sign in function
-  void signUserIn() async {
-    // Show a loading indicator before the sign-in attempt
+  // Function to validate email format
+  bool isValidEmail(String email) {
+    String pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regex = RegExp(pattern);
+    return regex.hasMatch(email);
+  }
+
+  // Function to validate the form
+  bool validateForm() {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      showSnackBar('Please fill in all fields');
+      return false;
+    } else if (!isValidEmail(email)) {
+      showSnackBar('Please enter a valid email');
+      return false;
+    }
+    return true;
+  }
+
+  // Function to show a snackbar
+  void showSnackBar(String message) {
     final snackBar = SnackBar(
-      content: const Text('Signing in...'),
+      content: Text(message),
       duration: const Duration(seconds: 2),
     );
-
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-
-      // Dismiss the "Signing in..." snackbar upon successful sign-in
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      // Navigate to another page or show a success message here if needed
-    } on FirebaseAuthException catch (e) {
-      // Dismiss the "Signing in..." snackbar before showing error message
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      String errorMessage = 'An error occurred. Please try again later.'; // Default error message
-
-      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-        errorMessage = 'Incorrect email or password'; // Generic message for authentication errors
-      }
-
+  // Sign in function with validation
+  void signUserIn() async {
+    if (validateForm()) {
+      // Show "Signing in..." snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(errorMessage),
+          content: Text('Signing in...'),
           duration: const Duration(seconds: 2),
         ),
       );
+
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+
+        // Dismiss the "Signing in..." snackbar
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+        // Show "Sign in successful" snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign in successful'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Navigate to another page or show a success message here
+      } on FirebaseAuthException catch (e) {
+        // Dismiss the "Signing in..." snackbar before showing the error message
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+        String errorMessage = 'An error occurred. Please try again later.';
+        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+          errorMessage = 'Incorrect email or password.';
+        }
+
+        // Show error message snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
+
 
   // Google Sign-in function with loading state
   void handleGoogleSignIn() async {
@@ -65,19 +108,15 @@ class _loginPageState extends State<loginPage> {
 
     try {
       await AuthService().googleSignIn();
-      // Navigate to the next page or perform some action upon successful sign-in
       setState(() {
         isGoogleSignInLoading = false; // Stop loading on success
       });
     } catch (error) {
-      // Handle error or cancellation
       setState(() {
         isGoogleSignInLoading = false; // Stop loading on error
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -88,18 +127,15 @@ class _loginPageState extends State<loginPage> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:[
-                
-                //logo
+              children: [
                 SizedBox(
-                  width: 150, 
+                  width: 150,
                   height: 150,
                   child: Image.asset('lib/images/IIUMRoadCareLogo.png'),
                 ),
-            
+
                 const SizedBox(height: 25),
-            
-                //sign in text
+
                 const Text(
                   'Sign In',
                   style: TextStyle(
@@ -107,54 +143,49 @@ class _loginPageState extends State<loginPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-            
+
                 const SizedBox(height: 25),
-            
-                //email textfield
+
                 MyTextField(
                   controller: emailController,
                   hintText: 'Email',
                   obscureText: false,
                 ),
-            
+
                 const SizedBox(height: 10),
-            
-                //password textfield
+
                 MyTextField(
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: true,
                 ),
-            
+
                 const SizedBox(height: 10),
-            
-                //forgot password
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    mainAxisAlignment:MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            
+
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.end,
+                //     children: [
+                //       Text(
+                //         'Forgot Password?',
+                //         style: TextStyle(
+                //           color: Colors.grey[600],
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+
                 const SizedBox(height: 25),
-            
-                //sign in button
+
                 MyButton(
                   text: "Login",
                   onTap: signUserIn,
                 ),
-            
+
                 const SizedBox(height: 25),
-            
-                //or continue with text
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -165,7 +196,7 @@ class _loginPageState extends State<loginPage> {
                           thickness: 0.5,
                         ),
                       ),
-                  
+
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
@@ -175,7 +206,7 @@ class _loginPageState extends State<loginPage> {
                           ),
                         ),
                       ),
-                  
+
                       Expanded(
                         child: Divider(
                           color: Colors.grey[400],
@@ -185,24 +216,17 @@ class _loginPageState extends State<loginPage> {
                     ],
                   ),
                 ),
-            
+
                 const SizedBox(height: 25),
-            
-                //google sign in button
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SquareTile(
-                      onTap: isGoogleSignInLoading ? null : handleGoogleSignIn, // Use the loading state to control onTap
-                      imagePath: 'lib/images/GoogleLoginIcon.png',
-                      isLoading: isGoogleSignInLoading, // Pass the loading state to SquareTile
-                    ),
-                  ],
+
+                SquareTile(
+                  onTap: isGoogleSignInLoading ? null : handleGoogleSignIn,
+                  imagePath: 'lib/images/GoogleLoginIcon.png',
+                  isLoading: isGoogleSignInLoading,
                 ),
-            
+
                 const SizedBox(height: 50),
-            
-                //Don't have an account? Sign up
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -225,7 +249,8 @@ class _loginPageState extends State<loginPage> {
                     ),
                   ],
                 ),
-            ]),
+              ],
+            ),
           ),
         ),
       ),

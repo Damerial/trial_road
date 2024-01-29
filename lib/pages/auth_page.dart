@@ -22,7 +22,9 @@ class AuthPage extends StatelessWidget {
               builder: (context, userSnapshot) {
                 if (userSnapshot.connectionState == ConnectionState.waiting) {
                   // Loading state while fetching user data
-                  return const CircularProgressIndicator(); // You can replace this with your loading widget
+                  return Center(
+                    child: const CircularProgressIndicator()
+                  ); // You can replace this with your loading widget
                 } else if (userSnapshot.hasError) {
                   // Error handling
                   return Text('Error fetching user data: ${userSnapshot.error}');
