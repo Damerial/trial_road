@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:roadcare/components/admin_dashboard.dart';
 import 'package:roadcare/components/navigation_menu.dart';
-import 'package:roadcare/pages/login_or_register_page.dart';
+import 'package:roadcare/pages/login/login_or_register_page.dart';
 
 
 class AuthPage extends StatelessWidget {

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:roadcare/pages/auth_page.dart';
+import 'package:roadcare/pages/login/auth_page.dart';
 import 'package:roadcare/pages//user/report_detail_page.dart';
 
 class HomePage extends StatefulWidget {

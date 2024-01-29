@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roadcare/pages/admin/completed_req.dart';
 import 'package:roadcare/pages/admin/new_request.dart';
-import 'package:roadcare/pages/auth_page.dart';
+import 'package:roadcare/pages/login/auth_page.dart';
 
 
 class AdminDashboard extends StatelessWidget {
