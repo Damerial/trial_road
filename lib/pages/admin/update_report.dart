@@ -18,6 +18,13 @@ class _UpdateReportState extends State<UpdateReport> {
   bool _isUpdating = false;
   File? _image;
 
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = widget.report['status']; // Initialize with current status
+  }
+
+
   pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
@@ -30,57 +37,55 @@ class _UpdateReportState extends State<UpdateReport> {
   }
   
   Future<void> _updateStatus() async {
+    setState(() {
+      _isUpdating = true;
+    });
 
-  setState(() {
-    _isUpdating = true;
-  });
+    try {
+      Map<String, dynamic> updateData = {
+        'status': _selectedStatus ?? widget.report['status'], // Use selected status or existing one
+      };
 
-  try {
-
-    // If a new image is selected, upload it to storage and get the download URL
-      String? imageUrl;
+      // If a new image is selected, upload it to storage and get the download URL
       if (_image != null) {
         String fileName = 'reports/${DateTime.now().millisecondsSinceEpoch}_${_image!.path.split('/').last}';
         firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child(fileName);
         firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
-        imageUrl = await (await uploadTask).ref.getDownloadURL();
+        String imageUrl = await (await uploadTask).ref.getDownloadURL();
+        updateData['imageUrl'] = imageUrl; // Only update imageUrl if a new image is selected
       }
 
-      // Update the status and image URL in Firestore
+      // Update the document with new data
       await FirebaseFirestore.instance
           .collection('reports')
           .doc(widget.report.id)
-          .update({
-        'status': _selectedStatus,
-        'imageUrl': imageUrl,
+          .update(updateData);
+
+      // Success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Status updated successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Delay and navigate back
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.pop(context);
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to update status. Please try again later.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isUpdating = false;
       });
-    // Show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Status updated successfully.'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    // Add a delay before navigating back to the previous screen
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Navigate back to the previous screen
-    Navigator.pop(context);
-  } catch (error) {
-    // Show an error message if updating fails
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Failed to update status. Please try again later.'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  } finally {
-    setState(() {
-      _isUpdating = false;
-    });
+    }
   }
-}
+
 
   void _showUpdateConfirmation(BuildContext context) {
     showDialog(
