@@ -46,13 +46,22 @@ class _UpdateReportState extends State<UpdateReport> {
         'status': _selectedStatus ?? widget.report['status'], // Use selected status or existing one
       };
 
-      // If a new image is selected, upload it to storage and get the download URL
       if (_image != null) {
+        // Get the old image URL
+        String? oldImageUrl = widget.report['imageUrl'];
+
+        // Delete the old image from Firebase Storage if it exists
+        if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+          firebase_storage.Reference oldImageRef = firebase_storage.FirebaseStorage.instance.refFromURL(oldImageUrl);
+          await oldImageRef.delete();
+        }
+
+        // Upload the new image to Firebase Storage
         String fileName = 'reports/${DateTime.now().millisecondsSinceEpoch}_${_image!.path.split('/').last}';
         firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child(fileName);
         firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
         String imageUrl = await (await uploadTask).ref.getDownloadURL();
-        updateData['imageUrl'] = imageUrl; // Only update imageUrl if a new image is selected
+        updateData['imageUrl'] = imageUrl; // Update imageUrl with the new image URL
       }
 
       // Update the document with new data
@@ -61,7 +70,6 @@ class _UpdateReportState extends State<UpdateReport> {
           .doc(widget.report.id)
           .update(updateData);
 
-      // Success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Status updated successfully.'),
@@ -69,7 +77,6 @@ class _UpdateReportState extends State<UpdateReport> {
         ),
       );
 
-      // Delay and navigate back
       await Future.delayed(const Duration(seconds: 2));
       Navigator.pop(context);
     } catch (error) {
