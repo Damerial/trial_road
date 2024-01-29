@@ -1,10 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:roadcare/components/my_button.dart';
 import 'package:roadcare/components/my_textfield.dart';
 import 'package:roadcare/components/square_tile.dart';
 import 'package:roadcare/services/auth_service.dart';
+
 
 class registerPage extends StatefulWidget {
   final Function()? onTap;
