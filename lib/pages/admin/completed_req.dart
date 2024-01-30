@@ -41,12 +41,35 @@ class _CompletedRequestState extends State<CompletedRequest> {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) return child; // Image is fully loaded, return it
+                    return SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                              : null, // Show the loading progress
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                    // If the image fails to load, show an error icon
+                    return Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[300],
+                      child: Icon(Icons.error, size: 50),
+                    );
+                  },
                 )
               : Container(
                   width: 80,
                   height: 80,
                   color: Colors.grey[300],
-                  child: const Icon(Icons.image, size: 50), // Placeholder for an image
+                  child: Icon(Icons.image, size: 50), // Placeholder for an image
                 ),
           ),
           const SizedBox(width: 10),
@@ -56,14 +79,13 @@ class _CompletedRequestState extends State<CompletedRequest> {
               children: [
                 Text(
                   "Severity: ${ds['severity']}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.black,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   )
                 ),
 
-                const SizedBox(height: 10),
 
                 GestureDetector(
                   onTap: () => _launchURL(googleMapsUrl),
@@ -71,19 +93,18 @@ class _CompletedRequestState extends State<CompletedRequest> {
                     "Location",
                     style: TextStyle(
                       color: Colors.blue,
-                      fontSize: 16,
+                      fontSize: 14,
                       decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 10),
 
                 Text(
                   "Status: ${ds['status']}",
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 16,
+                    fontSize: 14,
                   )
                 ),
               ],
@@ -92,7 +113,7 @@ class _CompletedRequestState extends State<CompletedRequest> {
           Column( // Icons Column
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               GestureDetector(
                 onTap: () {
