@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:roadcare/pages/admin/update_report.dart';
 import 'package:roadcare/pages/user/delete_report_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -93,18 +92,6 @@ class _CompletedRequestState extends State<CompletedRequest> {
           Column( // Icons Column
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UpdateReport(report: ds),
-                    ),
-                  );
-                },
-                child: Icon(Icons.edit, color: Colors.orange),
-              ),
-
               const SizedBox(height: 20),
 
               GestureDetector(
