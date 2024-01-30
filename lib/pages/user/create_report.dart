@@ -63,116 +63,135 @@ class _CreateReportState extends State<CreateReport> {
   }
 
   Future<void> submitReport() async {
-  if (_image == null) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Error'),
-        content: Text('Please select an image for the report.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-    return;
-  }
+    // Check if the image is selected
+    if (_image == null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Please select an image for the report.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
-  setState(() {
-    _isSubmitting = true; // Indicate that submission has started
-    _uploadProgress = 0.1; // Initial progress after validation
-  });
+    // Check if the location is set
+    if (_selectedLatitude == null || _selectedLongitude == null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Please set the location for the report.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
-  try {
-    // Image Upload Stage
-    String fileName = 'reports/${DateTime.now().millisecondsSinceEpoch}_${_image!.path.split('/').last}';
-    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child(fileName);
-    firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
+    setState(() {
+      _isSubmitting = true; // Indicate that submission has started
+      _uploadProgress = 0.1; // Initial progress after validation
+    });
 
-    // Listen to upload progress
-    uploadTask.snapshotEvents.listen((firebase_storage.TaskSnapshot snapshot) {
-      setState(() {
-        // Calculate the upload stage progress (0.1 to 0.6 range)
-        _uploadProgress = 0.1 + (snapshot.bytesTransferred.toDouble() / snapshot.totalBytes.toDouble()) * 0.5;
+    try {
+      // Image Upload Stage
+      String fileName = 'reports/${DateTime.now().millisecondsSinceEpoch}_${_image!.path.split('/').last}';
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child(fileName);
+      firebase_storage.UploadTask uploadTask = ref.putFile(_image!);
+
+      // Listen to upload progress
+      uploadTask.snapshotEvents.listen((firebase_storage.TaskSnapshot snapshot) {
+        setState(() {
+          // Calculate the upload stage progress (0.1 to 0.6 range)
+          _uploadProgress = 0.1 + (snapshot.bytesTransferred.toDouble() / snapshot.totalBytes.toDouble()) * 0.5;
+        });
       });
-    });
 
-    // Wait for the upload to complete
-    await uploadTask;
+      // Wait for the upload to complete
+      await uploadTask;
 
-    // Get the image URL
-    final imageUrl = await ref.getDownloadURL();
+      // Get the image URL
+      final imageUrl = await ref.getDownloadURL();
 
-    // Firestore Document Add Stage
-    await FirebaseFirestore.instance.collection('reports').add({
-      'imageUrl': imageUrl,
-      'latitude': _selectedLatitude,
-      'longitude': _selectedLongitude,
-      'severity': _selectedSeverity,
-      'description': _descriptionController.text,
-      'status': 'Pending', 
-      'userUID': userUID,   
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+      // Firestore Document Add Stage
+      await FirebaseFirestore.instance.collection('reports').add({
+        'imageUrl': imageUrl,
+        'latitude': _selectedLatitude,
+        'longitude': _selectedLongitude,
+        'severity': _selectedSeverity,
+        'description': _descriptionController.text,
+        'status': 'Pending', 
+        'userUID': userUID,   
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    // Update progress to indicate Firestore update is complete
-    setState(() {
-      _uploadProgress = 0.9; // Almost complete, leaving some space for finalization
-    });
+      // Update progress to indicate Firestore update is complete
+      setState(() {
+        _uploadProgress = 0.9; // Almost complete, leaving some space for finalization
+      });
 
-    // Show success dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Success'),
-        content: Text('Report has been submitted successfully.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => MainLayout()),
-                (Route<dynamic> route) => false,
-              );
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Success'),
+          content: Text('Report has been submitted successfully.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => MainLayout()),
+                  (Route<dynamic> route) => false,
+                );
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
 
-  } catch (e) {
-    // Handle errors, e.g., show an error dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Error'),
-        content: Text('Failed to submit report. Please try again later.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  } finally {
-    // Finalization stage
-    setState(() {
-      _isSubmitting = false; // Stop the submission process
-      _uploadProgress = 1.0; // Mark completion before hiding the indicator
-    });
+    } catch (e) {
+      // Handle errors, e.g., show an error dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Failed to submit report. Please try again later.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      // Finalization stage
+      setState(() {
+        _isSubmitting = false; // Stop the submission process
+        _uploadProgress = 1.0; // Mark completion before hiding the indicator
+      });
 
-    // Optionally, add a delay to show the completed progress indicator before hiding it
-    await Future.delayed(Duration(milliseconds: 500));
+      // Optionally, add a delay to show the completed progress indicator before hiding it
+      await Future.delayed(Duration(milliseconds: 500));
 
-    setState(() {
-      _uploadProgress = 0.0; // Reset progress
-    });
+      setState(() {
+        _uploadProgress = 0.0; // Reset progress
+      });
+    }
   }
-}
 
 
 @override
